@@ -18,14 +18,13 @@ class Story {
     this.url = url;
     this.username = username;
     this.createdAt = createdAt;
+    // this.favorite = currentUser.favorites.include(this) ? true : false;
   }
 
   /** Parses hostname out of URL and returns it. */
 
   getHostName() {
-    let url = new URL(this.url);
-    let hostName = url.hostname;
-    return hostName;
+    return new URL(this.url).host;
   }
 }
 
@@ -91,6 +90,7 @@ class StoryList {
           function (data) {
             console.log(data);
             stry = new Story(data.story);
+            currentUser.ownStories.push(stry);
           }
         );
         return stry;
@@ -98,6 +98,21 @@ class StoryList {
         alert("url not valid");
       }
     }
+  }
+  async removeStory(user, storyId) {
+    const token = user.loginToken;
+    await axios({
+      url: `${BASE_URL}/stories/${storyId}`,
+      method: "DELETE",
+      data: { token: token },
+    });
+
+    // filter out the story whose ID we are removing
+    this.stories = this.stories.filter((story) => story.storyId !== storyId);
+
+    // do the same thing for the user's list of stories & their favorites
+    user.ownStories = user.ownStories.filter((s) => s.storyId !== storyId);
+    user.favorites = user.favorites.filter((s) => s.storyId !== storyId);
   }
 }
 
@@ -212,6 +227,22 @@ class User {
       return null;
     }
   }
+
+  static addFav(storyId) {
+    const included = (story) => story.storyId === storyId;
+    let story = storyList.stories.filter(included);
+    console.log(story);
+    story[0].favorite = true;
+    currentUser.favorites.push(story[0]);
+  }
+
+  static removeFav(storyId) {
+    const included = (story) => story.storyId === storyId;
+    const story = currentUser.favorites.filter(included);
+    story.favorite = false;
+    const index = currentUser.favorites.indexOf(story[0]);
+    currentUser.favorites.splice(index, 1);
+  }
   // toggles the star on and off and add story to favorite list or deletes
   static async favorite(e) {
     console.log(e.target.parentElement.id);
@@ -227,6 +258,7 @@ class User {
         data: obj,
         success: function (data) {
           console.log(data);
+          User.removeFav(storyId);
         },
       });
     } else {
@@ -235,10 +267,15 @@ class User {
         obj,
         function (data) {
           console.log(data);
+          User.addFav(storyId);
         }
       );
     }
     $(this).toggleClass("fa-regular fa-solid");
+  }
+
+  isFavorite(story) {
+    return this.favorites.some((s) => s.storyId === story.storyId);
   }
 }
 

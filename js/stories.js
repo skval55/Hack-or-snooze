@@ -8,6 +8,9 @@ let favoriteStories;
 async function getAndShowStoriesOnStart() {
   storyList = await StoryList.getStories();
   $storiesLoadingMsg.remove();
+  Boolean(currentUser)
+    ? $("#loggedin-nav").removeClass("hidden")
+    : $("#loggedin-nav").addClass("hidden");
 
   putStoriesOnPage();
 }
@@ -23,9 +26,16 @@ function generateStoryMarkup(story) {
   // console.debug("generateStoryMarkup", story);
 
   const hostName = story.getHostName();
+
+  const showStar = Boolean(currentUser);
   return $(`
       <li id="${story.storyId}">
-      <i class="fa-regular fa-star"></i>
+      ${
+        myStories === true
+          ? '<i id="remove" class="fa-solid fa-trash"></i>'
+          : ""
+      }
+        ${showStar ? getStarHTML(story, currentUser) : ""}
         <a href="${story.url}" target="a_blank" class="story-link">
           ${story.title}
         </a>
@@ -38,17 +48,25 @@ function generateStoryMarkup(story) {
 
 /** Gets list of stories from server, generates their HTML, and puts on page. */
 
+function getStarHTML(story, user) {
+  const isFavorite = user.isFavorite(story);
+  const starType = isFavorite
+    ? '<i id="star" class="fa-solid fa-star"></i>'
+    : '<i id="star" class="fa-regular fa-star"></i>';
+  return starType;
+}
+
 function putStoriesOnPage() {
   console.debug("putStoriesOnPage");
 
   $allStoriesList.empty();
-
+  $allStoriesList.removeClass("noNums");
   // loop through all of our stories and generate HTML for them
   for (let story of storyList.stories) {
     const $story = generateStoryMarkup(story);
     $allStoriesList.append($story);
   }
-  $("i").click(User.favorite);
+  $(".fa-star").click(User.favorite);
   $allStoriesList.show();
 }
 
@@ -82,25 +100,22 @@ async function submitStory(e) {
 
 $("#story-form button").on("click", submitStory);
 
+// puts all the favorites stories on the page
 async function favorites(e) {
   $storyForm.hide();
   e.preventDefault();
   $allStoriesList.empty();
   favorites = await currentUser.favorites;
-
+  if (currentUser.favorites.length === 0) {
+    $allStoriesList.append("<h5>No favorites yet</h5>");
+  }
+  $allStoriesList.addClass("noNums");
   for (let story of favorites) {
+    story.favorite = true;
     const $story = generateStoryMarkup(story);
     $allStoriesList.append($story);
   }
-  $("i").click(User.favorite);
+  $(".fa-star").click(User.favorite);
 }
 
 $("#nav-fav").on("click", favorites);
-$("#my-stories").on("click", function () {
-  $allStoriesList.empty();
-  for (let story of currentUser.ownStories) {
-    const $story = generateStoryMarkup(story);
-    $allStoriesList.append($story);
-  }
-  $("i").click(User.favorite);
-});

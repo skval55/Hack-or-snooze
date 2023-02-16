@@ -16,6 +16,7 @@ async function login(evt) {
   // grab the username and password
   const username = $("#login-username").val();
   const password = $("#login-password").val();
+  // $("#loggedin-nav").removeClass("hidden");
 
   // User.login retrieves user info from API and returns User instance
   // which we'll make the globally-available, logged-in user.
@@ -25,6 +26,9 @@ async function login(evt) {
 
   saveUserCredentialsInLocalStorage();
   updateUIOnUserLogin();
+  getAndShowStoriesOnStart();
+  $loginForm.hide();
+  $signupForm.hide();
 }
 
 $loginForm.on("submit", login);
@@ -38,6 +42,7 @@ async function signup(evt) {
   const name = $("#signup-name").val();
   const username = $("#signup-username").val();
   const password = $("#signup-password").val();
+  // $("#loggedin-nav").removeClass("hidden");
 
   // User.signup retrieves user info from API and returns User instance
   // which we'll make the globally-available, logged-in user.
@@ -47,6 +52,9 @@ async function signup(evt) {
   updateUIOnUserLogin();
 
   $signupForm.trigger("reset");
+  getAndShowStoriesOnStart();
+  $loginForm.hide();
+  $signupForm.hide();
 }
 
 $signupForm.on("submit", signup);
@@ -60,6 +68,7 @@ function logout(evt) {
   console.debug("logout", evt);
   localStorage.clear();
   location.reload();
+  // $("#loggedin-nav").addClass("hidden");
 }
 
 $navLogOut.on("click", logout);

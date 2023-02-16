@@ -37,3 +37,11 @@
 .story-user {
   display: block;
 }
+
+.fa-trash:hover{
+  color: red;
+}
+
+.noNums{
+  list-style: none;
+}

@@ -46,8 +46,7 @@ function generateStoryMarkup(story) {
     `);
 }
 
-/** Gets list of stories from server, generates their HTML, and puts on page. */
-
+// a function to put specific star on story
 function getStarHTML(story, user) {
   const isFavorite = user.isFavorite(story);
   const starType = isFavorite
@@ -56,6 +55,7 @@ function getStarHTML(story, user) {
   return starType;
 }
 
+/** Gets list of stories from server, generates their HTML, and puts on page. */
 function putStoriesOnPage() {
   console.debug("putStoriesOnPage");
 
@@ -72,11 +72,8 @@ function putStoriesOnPage() {
 
 // story submit form
 async function submitStory(e) {
-  console.log(currentUser);
-  e.preventDefault();
+  // e.preventDefault();
   for (let input of $("#story-form input")) {
-    console.log(input);
-    console.log(input.value);
     if (input.value === "") {
       alert(`Enter ${input.placeholder}`);
       return;
@@ -90,7 +87,7 @@ async function submitStory(e) {
   for (let input of $("#story-form input")) {
     input.value = "";
   }
-  console.log(currentUser.username, storyObj);
+  $("#submit-story").val("Submit");
   await storyList.addStory(currentUser.username, storyObj);
   $storyForm.hide();
 

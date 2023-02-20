@@ -1,11 +1,11 @@
 "use strict";
-
+let myStories = false;
 /******************************************************************************
  * Handling navbar clicks and updating navbar
  */
 
 /** Show main list of all stories when click site name */
-let myStories = false;
+
 function navAllStories(evt) {
   console.debug("navAllStories", evt);
   hidePageComponents();
@@ -44,6 +44,7 @@ function updateNavOnLogin() {
 
 // my stories section of navbar hides other parts then shows only user stories
 function putUserStoriesOnPage() {
+  myStories = true;
   if (currentUser.ownStories.length === 0) {
     $allStoriesList.append("<h5>No user stories yet!");
   } else {
@@ -74,7 +75,6 @@ async function deleteStory(evt) {
 
 // event listener on my stories on navbar
 $("#my-stories").on("click", function () {
-  myStories = true;
   hidePageComponents();
   $allStoriesList.empty();
   $allStoriesList.show();

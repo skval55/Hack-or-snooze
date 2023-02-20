@@ -82,13 +82,11 @@ class StoryList {
           url: `${newStory.url}`,
         },
       };
-      console.log(obj);
       try {
         await $.post(
           "https://hack-or-snooze-v3.herokuapp.com/stories",
           obj,
           function (data) {
-            console.log(data);
             stry = new Story(data.story);
             currentUser.ownStories.push(stry);
           }
@@ -99,6 +97,8 @@ class StoryList {
       }
     }
   }
+
+  // makes a delete request to the API
   async removeStory(user, storyId) {
     const token = user.loginToken;
     await axios({
@@ -228,14 +228,15 @@ class User {
     }
   }
 
+  // this function adds a story to favorites list
   static addFav(storyId) {
     const included = (story) => story.storyId === storyId;
     let story = storyList.stories.filter(included);
-    console.log(story);
     story[0].favorite = true;
     currentUser.favorites.push(story[0]);
   }
 
+  // this function removes story from favorite list
   static removeFav(storyId) {
     const included = (story) => story.storyId === storyId;
     const story = currentUser.favorites.filter(included);
@@ -245,7 +246,6 @@ class User {
   }
   // toggles the star on and off and add story to favorite list or deletes
   static async favorite(e) {
-    console.log(e.target.parentElement.id);
     let storyId = e.target.parentElement.id;
     const obj = {
       token: localStorage.token,
@@ -256,8 +256,7 @@ class User {
         url: `https://hack-or-snooze-v3.herokuapp.com/users/${currentUser.username}/favorites/${storyId}`,
         type: "DELETE",
         data: obj,
-        success: function (data) {
-          console.log(data);
+        success: function () {
           User.removeFav(storyId);
         },
       });
@@ -265,8 +264,7 @@ class User {
       await $.post(
         `https://hack-or-snooze-v3.herokuapp.com/users/${currentUser.username}/favorites/${storyId}`,
         obj,
-        function (data) {
-          console.log(data);
+        function () {
           User.addFav(storyId);
         }
       );
@@ -278,7 +276,3 @@ class User {
     return this.favorites.some((s) => s.storyId === story.storyId);
   }
 }
-
-// this.favorites = this.favorites.filter((story) => story.favorite === true);
-//     let otherFav = storyList.stories.filter((story) => story.favorite === true);
-// this.favorites.concat(otherFav);
